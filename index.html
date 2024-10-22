@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KetoPowerX Quiz</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/font.css">
+    <link rel="stylesheet" href="font-awesome/css/font-awesome.css">
+    <link rel="stylesheet" href="font-awesome/css/font-awesome.min.css">
+</head>
+<body class="poppins-regular">
+
+<!--TITLE-->
+<div class="title-container">
+    <div class="logo-container">
+        <img src="img/logo.png" alt="">
+    </div>
+</div>
+
+<!--INTRO-->
+<div class="bg intro-container" id="intro">
+    <h1>Personalized weight loss prediction</h1>
+    <div class="intro-wrapper">
+        <div class="info-container">
+            <h2>Clinical studies have demonstrated the effectiveness of <span class="bold">KetoPowerX</span>. Using this data, we can estimate how long it will take for you to achieve your target weight.</h2>
+            <ul>
+                <li><i class="fa fa-dot-circle-o" aria-hidden="true"></i>Clinical studies have confirmed the effectiveness of KetoPowerX. This information helps determine how long it will take to reach your ideal weight.</li>
+                <li><i class="fa fa-dot-circle-o" aria-hidden="true"></i>Discover how much weight you could lose with KetoPowerX.</li>
+                <li><i class="fa fa-dot-circle-o" aria-hidden="true"></i>Find out if KetoPowerX is the right solution for you and how much time you’ll need to achieve your goals.</li>
+            </ul>
+        </div>
+        <div class="bottle-container">
+            <img src="img/bottle-intro.png" alt="">
+        </div>
+    </div>
+    <button class="poppins-bold start-button" onclick="showQuiz()"><span>START QUIZ</span></button>
+</div>
+
+<!--QUIZ-->
+<div class="quiz-container bg2 hidden" id="quiz"> 
+    <div class="quiz-progress">
+        <h3>1 / 5</h3>
+        <div class="progress-bar"></div>
+    </div>
+
+    <!--GENDER-->
+
+    <div id="gender-question" class="question-container">
+        <h2>What is your gender?</h2>
+        <div class="options-container">
+            <div class="option" id="masculine" onclick="selectGender('img/masculine.png', 'masculine'); bodyQuestion(); incrementProgress();">
+                <p>Masculine</p>
+                <img src="img/masculine.png" alt="">
+            </div>
+            <div class="option" id="female" onclick="selectGender('img/female.png', 'female'); bodyQuestion(); incrementProgress();">
+                <p>Female</p>
+                <img src="img/female.png" alt="">
+            </div>
+        </div>
+    </div>
+
+    <!--BODY-->
+    <div id="body-question" class="question-container hidden">
+        <h2>How tall are you and how much do you weigh?</h2>
+        <div class="options-container">
+            <input type="number" placeholder="Weight (kg)" class="poppins-regular" id="weight">
+
+            <input type="number" placeholder="Target Weight (kg)" class="poppins-regular" id="target-weight">
+
+            <input type="number" placeholder="Height (cm)" class="poppins-regular" id="height">
+        </div>
+        <button class="poppins-bold continue-button" onclick="validateInputs(); calculateBMI()"><span>Continue</span></button>
+    </div>
+
+    <!--AGE-->
+    <div id="age-question" class="question-container hidden">
+        <h2>How old are you?</h2>
+        <div class="options-container">
+            <input type="number" placeholder="Your age" class="poppins-regular" id="age">
+        </div>
+        <button class="poppins-bold continue-button" onclick="validateAgeInput()"><span>Continue</span></button>
+    </div>
+
+    <!--MOTIVATION-->
+    <div id="motivation-question" class="question-container hidden">
+        <h2>What is your level of motivation?</h2>
+        <div class="options-container">
+            <div class="option" onclick="selectMotivation('low'); trainingQuestion(); incrementProgress();">
+                <p>Low</p>
+            </div>
+            <div class="option" onclick="selectMotivation('medium'); trainingQuestion(); incrementProgress();">
+                <p>Medium</p>
+            </div>
+            <div class="option" onclick="selectMotivation('high'); trainingQuestion(); incrementProgress();">
+                <p>High</p>
+            </div>
+        </div>
+    </div>
+    
+    <!--TRAINING-->
+    <div id="training-question" class="question-container hidden">
+        <h2>What is your training level?</h2>
+        <div class="options-container">
+            <div class="option" onclick="selectTraining('low'); calculateMetabolicAge(); showCalculating(); incrementProgress(); ">
+                <p>Low</p>
+            </div>
+            <div class="option" onclick="selectTraining('medium'); calculateMetabolicAge(); showCalculating(); incrementProgress(); ">
+                <p>Medium</p>
+            </div>
+            <div class="option" onclick="selectTraining('high'); calculateMetabolicAge(); showCalculating(); incrementProgress(); ">
+                <p>High</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--CALCULATING-->
+<div class="bg2 calculating-container hidden" id="calculating">
+    <div class="calculating-wrapper">
+        <h2>Calculating your report</h2>
+        <div class="spinner-container" >
+            <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+        </div>
+        <div class="generating-report">
+            <p class="hidden">Analyzing your answers</p> 
+            <p class="hidden">Generating your personal plan</p> 
+        </div>
+    </div>
+</div>
+
+<!--REPORT-->
+<div class="bg3 report-container hidden" id="report">
+    <div class="report-wrapper">
+        <div class="report-first">
+            <div class="text-report">
+                <p>Our calculations indicate that you...</p>
+                <h4>should reach a weight of <span class="targetweight-value"></span>kg on <span class="estimated-date"></span></h4>
+            </div>
+            
+            <div class="graph-report">
+                <div class="graph-text">
+                    <div class="current">
+                        <p>CURRENT</p>
+                        <p><span class="today"></span></p>
+                        <h4><span class="weight-value"></span>kg</h4>
+                    </div>
+                    <div class="graph-icon">
+                        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                    </div>
+                    <div class="goal">
+                        <p>GOAL</p>
+                        <p><span class="estimated-date"></span></p>
+                        <h4><span class="targetweight-value"></span>kg</h4>
+                    </div>
+                </div>
+                <div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="graph w-full h-auto" xmlns:xlink="http://www.w3.org/1999/xlink" width="472" height="245" viewBox="0 0 472 245" fill="none">
+                        <line y1="-0.5" x2="222" y2="-0.5" transform="matrix(0.00133906 0.999999 -1 0.000354833 118.75 22.7854)" stroke="#C3D4BB"></line>
+                        <line y1="-0.5" x2="222" y2="-0.5" transform="matrix(0.00133906 0.999999 -1 0.000354833 235.502 22.7854)" stroke="#C3D4BB"></line>
+                        <line y1="-0.5" x2="222" y2="-0.5" transform="matrix(0.00133906 0.999999 -1 0.000354833 352.252 22.7854)" stroke="#C3D4BB"></line>
+                        <line y1="-0.5" x2="222" y2="-0.5" transform="matrix(0.00133906 0.999999 -1 0.000354833 469.002 22.7854)" stroke="#C3D4BB"></line>
+                        <path d="M244.5 152.5C155 101.834 89.5 58.7855 2 65.7854V244.785H470V222C470 222 334 203.166 244.5 152.5Z" fill="#bb4db5" fill-opacity="0.4"></path>
+                        <path d="M2 65.7853C89.5 58.7854 155 102.334 244.5 153C334 203.666 469.5 222.5 469.5 222.5" stroke="#bb4db5" stroke-width="4" stroke-linecap="round"></path><path d="M377.513 129.513H469.487V168.487H377.513V129.513Z" fill="#bb4db5" stroke="#bb4db5" stroke-width="1.02624"></path>
+                        <image x="390" y="140" width="20" height="20" href="https://imagedelivery.net/u8JiH5bJQTfO_tBFRSJ5Lg/42a4b43e-b11c-42d1-6673-65d2aaf90200/public"></image>
+                        <text id="text180" x="435" y="150" fill="white" font-size="16" font-weight="500" text-anchor="middle" alignment-baseline="middle" dominant-baseline="middle"><tspan class="targetweight-value"></tspan> kg</text>
+                        <defs>
+                            <clipPath id="clip-path2">
+                                <rect x="412" y="141" rx="6" ry="6" width="40" height="14"></rect>
+                            </clipPath>
+                            <linearGradient id="fill">
+                                <stop offset="0.599964" stop-color="#D1D5DB" stop-opacity="1">
+                                    <animate attributeName="offset" values="-2; -2; 1" keyTimes="0; 0.25; 1" dur="2s" repeatCount="indefinite"></animate>
+                                </stop>
+                                <stop offset="1.59996" stop-color="#ecebeb" stop-opacity="1">
+                                    <animate attributeName="offset" values="-1; -1; 2" keyTimes="0; 0.25; 1" dur="2s" repeatCount="indefinite"></animate>
+                                </stop>
+                                <stop offset="2.59996" stop-color="#f3f3f3" stop-opacity="1">
+                                    <animate attributeName="offset" values="0; 0; 3" keyTimes="0; 0.25; 1" dur="2s" repeatCount="indefinite"></animate>
+                                </stop>
+                            </linearGradient>
+                        </defs>
+                        <path d="M423 166.596L423 214" stroke="#02362A" stroke-width="2"></path>
+                        <path d="M427.479 214C427.479 216.486 425.468 218.5 422.989 218.5C420.511 218.5 418.5 216.486 418.5 214C418.5 211.514 420.511 209.5 422.989 209.5C425.468 209.5 427.479 211.514 427.479 214Z" fill="#02362A" stroke="#02362A"></path>
+                        <path d="M2.51312 0.51312H65.4869V39.4869H2.51312V0.51312Z" stroke="#02362A" stroke-width="1.03"></path><text id="text180" x="35" y="21" fill="#02362A" font-size="16" font-weight="600" text-anchor="middle" alignment-baseline="middle" dominant-baseline="middle"><tspan class="weight-value"></tspan> kg</text>
+                        <defs>
+                            <clipPath id="clip-path"><rect x="15" y="13" rx="6" ry="6" width="40" height="14"></rect>
+                            </clipPath>
+                            <linearGradient id="fill">
+                                <stop offset="0.599964" stop-color="#D1D5DB" stop-opacity="1">
+                                    <animate attributeName="offset" values="-2; -2; 1" keyTimes="0; 0.25; 1" dur="2s" repeatCount="indefinite"></animate>
+                                </stop>
+                                <stop offset="1.59996" stop-color="#ecebeb" stop-opacity="1">
+                                    <animate attributeName="offset" values="-1; -1; 2" keyTimes="0; 0.25; 1" dur="2s" repeatCount="indefinite"></animate>
+                                </stop>
+                                <stop offset="2.59996" stop-color="#f3f3f3" stop-opacity="1">
+                                    <animate attributeName="offset" values="0; 0; 3" keyTimes="0; 0.25; 1" dur="2s" repeatCount="indefinite"></animate>
+                                </stop>
+                            </linearGradient>
+                        </defs>
+                        <path d="M33 38.0957L33 63.0001" stroke="#02362A" stroke-width="2"></path>
+                        <path d="M37.4787 65C37.4787 67.4863 35.4677 69.5 32.9893 69.5C30.511 69.5 28.5 67.4863 28.5 65C28.5 62.5137 30.511 60.5 32.9893 60.5C35.4677 60.5 37.4787 62.5137 37.4787 65Z" fill="#02362A" stroke="#02362A"></path>
+                        <defs>
+                            <linearGradient id="paint0_linear_222_7005" x1="236" y1="22.5334" x2="236" y2="244.785" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#93BDB8"></stop><stop offset="1" stop-color="#00B67A" stop-opacity="0"></stop>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <p class="days"><span id="days-needed"></span> days</p>
+            </div>
+        </div>
+
+
+
+        <div class="report-data">
+            <div class="bmi">
+                <h4>YOUR BMI</h4>
+                <p><span class="bmi-result"></span></p>
+                <div class="weight-bar">
+                    <div class="normal-weight"></div>
+                    <div class="overweight"></div>
+                    <div class="obesity"></div>
+                </div>
+                <div class="weight-conteiner">
+                    <p id="normal">normal</p>
+                    <p id="overweight">overweight</p>
+                    <p id="obese">obese</p>
+                </div>
+            </div>
+            <div class="metabolic">
+                <h4>Your metabolic age</h4>
+                <p><span id="metabolic-age"></span></p>
+                <p class="note">It has long been known that a reader can...</p>
+                <div class="fat-burning">
+                    <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                    <p>Your fat burning is very low</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="data-user-container">
+            <div class="data-user">
+                <p>GENDER</p>
+                <div class="gender-img-contanier">
+                    <img src="" alt="" class="gender-value">
+                </div>
+            </div>
+            <div class="data-user">
+                <p>YEARS</p>
+                <h3><span class="age-value"></span></h3>
+            </div>
+            <div class="data-user">
+                <p>HEIGHT, CM</p>
+                <h3><span class="height-value"></span></h3>
+            </div>
+            <div class="data-user">
+                <p>WEIGHT, KG</p>
+                <h3><span class="weight-value"></span></h3>
+            </div>
+        </div>
+        <button class="poppins-bold start-button scroll-button"><span>ORDER NOW</span></button>
+    </div>
+</div>
+
+<!--BUY PRODUCT-->
+<div class="product-container hidden" id="product-info">
+    <h2>Your personal product recommendation</h2>
+    <div class="product-wrapper">
+        <div class="product">
+            <h3>Beginners</h3>
+            <div class="product-img-container">
+                <img src="img/1.png" alt="">
+            </div>
+            <div class="price-product">
+                <div class="price">
+                    <h4>49.95€</h4>
+                    <p>Price per pack</p>
+                </div>
+                <p class="old-price">79.95€</p>
+            </div>
+            <h3 class="total-price">Total: 54.90€</h3>
+            <div class="shipping-info">
+                <div class="shipping"><i class="fa fa-check-circle-o" aria-hidden="true"></i>Get a month's supply. You only get one pack.</div>
+                <div class="shipping"><i class="fa fa-check-circle-o" aria-hidden="true"></i>4.95 EUR shipping costs</div>
+            </div>
+            <button class="poppins-bold order-button"><span>Order Now</span></button>
+            <div class="cards-container">
+                <p>GUARANTEED SECURE PURCHASE PROCESS</p>
+                <img src="img/cards.jpg" alt="">
+            </div>
+        </div>
+
+        <div class="product">
+            <h3>Advanced</h3>
+            <div class="product-img-container">
+                <img src="img/4.png" alt="">
+            </div>
+            <div class="price-product">
+                <div class="price">
+                    <h4>36.65€</h4>
+                    <p>Price per pack</p>
+                </div>
+                <p class="old-price">59.95€</p>
+            </div>
+            <h3 class="total-price">Total: 109.95€</h3>
+            <div class="shipping-info">
+                <div class="shipping"><i class="fa fa-check-circle-o" aria-hidden="true"></i>You will receive 3 packs at once.</div>
+                <div class="shipping"><i class="fa fa-check-circle-o" aria-hidden="true"></i>SAVE 46% WITH THIS BUNDLE</div>
+                <div class="shipping"><i class="fa fa-check-circle-o" aria-hidden="true"></i>FREE SHIPPING</div>
+                <div class="shipping"><i class="fa fa-check-circle-o" aria-hidden="true"></i>60-day money-back guarantee</div>
+            </div>
+            <button class="poppins-bold order-button"><span>Order Now</span></button>
+            <div class="cards-container">
+                <p>GUARANTEED SECURE PURCHASE PROCESS</p>
+                <img src="img/cards.jpg" alt="">
+            </div>
+        </div>
+
+        <div class="product">
+            <h3>Intermediate</h3>
+            <div class="product-img-container">
+                <img src="img/2.png" alt="" class="">
+            </div>
+            <div class="price-product">
+                <div class="price">
+                    <h4>39.97€</h4>
+                    <p>Price per pack</p>
+                </div>
+                <p class="old-price">69.95€</p>
+            </div>
+            <h3 class="total-price">Total: 79.95€</h3>
+            <div class="shipping-info">
+                <div class="shipping"><i class="fa fa-check-circle-o" aria-hidden="true"></i>You will receive 2 packs at once.</div>
+                <div class="shipping"><i class="fa fa-check-circle-o" aria-hidden="true"></i>SAVE 27% WITH THIS BUNDLE</div>
+                <div class="shipping"><i class="fa fa-check-circle-o" aria-hidden="true"></i>FREE SHIPPING</div>
+            </div>
+            <button class="poppins-bold order-button"><span>Order Now</span></button>
+            <div class="cards-container">
+                <p>GUARANTEED SECURE PURCHASE PROCESS</p>
+                <img src="img/cards.jpg" alt="">
+            </div>
+        </div>
+    </div>
+
+    <div class="bg4 shipping-container">
+        <div class="shipping-wrapper">
+            <div class="shipping-data">
+                <h2><i class="fa fa-globe" aria-hidden="true"></i>Free Shipping</h2>
+                <p>You will receive your order within 3-5 days within the EU</p>
+            </div>
+            <div class="shipping-data">
+                <h2><i class="fa fa-check-circle-o" aria-hidden="true"></i>60-day money-back guarantee</h2>
+                <p>Send it back to us for free and get all your money back – no questions asked.</p>
+            </div>
+            <div class="shipping-data">
+                <h2><i class="fa fa-flag" aria-hidden="true"></i>Made in the EU</h2>
+                <p>Manufactured in an award-winning supplement laboratory in the EU.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="payment-container">
+        <div class="shipping-info-container">
+            <p class="step">Step 1</p>
+            <h2>Shipping Information</h2>
+            <p>Where should we send your bottle(s)?</p>
+            <div>
+                <form action="">
+                    <div class="flexbox">
+                        <input type="text" placeholder="First Name" class="poppins-regular payment-input">
+                        <input type="text" placeholder="Last Name" class="poppins-regular payment-input">
+                    </div>
+                    <input type="text" placeholder="E-Mail" class="poppins-regular payment-input">
+                    <input type="text" placeholder="Address" class="poppins-regular payment-input">
+                    <div class="flexbox">
+                        <input type="text" placeholder="City" class="poppins-regular payment-input">
+                        <input type="text" placeholder="Postcode" class="poppins-regular payment-input">
+                    </div>
+                    <div class="flexbox">
+                        <input type="text" placeholder="Phone Number" class="poppins-regular payment-input">
+                    </div>
+                    <div class="shipping-date">
+                        <p><i class="fa fa-truck" aria-hidden="true"></i>Your order will be shipped on October 5, 2024</p>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="payment-method-container">
+            <p class="step">Step 2</p>
+            <h2>Payment Method</h2>
+            <p>256-bit SSL-encrypted checkout</p>
+            <div>
+                <form action="">
+                    <input type="text" placeholder="Cardholder Name" class="poppins-regular payment-input">
+                    <input type="text" placeholder="Card Number" class="poppins-regular payment-input">
+                    <div class="flexbox">
+                        <input type="text" placeholder="CVV" class="poppins-regular payment-input">
+                        <input type="text" placeholder="Expiry" class="poppins-regular payment-input">
+                    </div>
+                    <button class="poppins-bold order-button"><span>Pay Now</span></button>
+                </form>
+                <div class="payment-cards">
+                    <img src="img/cards2.svg" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg3">
+    <div class="reviews-container">
+        <h2>58,273 people are convinced</h2>
+        <p class="reviews-subtitle">See what some of them say about KetoPowerX.</p>
+        <div class="reviews">
+            <div class="review">
+                <div class="user-container">
+                    <div class="user-img">
+                        <img src="img/review1.jpg" alt="">
+                        <div class="user-data">
+                            <h4>Adrienne</h4>
+                            <div class="user-country">
+                                <img src="img/france.png" alt="" class="flag">
+                                <p>France</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="verified"><i class="fa fa-check" aria-hidden="true"></i>Verified</p>
+                </div>
+                <div class="rating">
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                </div>
+                <h3>Energy Boost and Weight Loss!</h3>
+                <p class="text-review">I've been using Keto Power X for just over a month, and the results are fantastic! Not only have I lost 10 pounds, but my energy levels are through the roof. I love how easy it is to incorporate into my daily routine, and the fact that I don’t feel jittery or anxious.</p>
+            </div>
+
+            <div class="review">
+                <div class="user-container">
+                    <div class="user-img">
+                        <img src="img/review2.jpg" alt="">
+                        <div class="user-data">
+                            <h4>Marry</h4>
+                            <div class="user-country">
+                                <img src="img/germany.png" alt="" class="flag">
+                                <p>Germany</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="verified"><i class="fa fa-check" aria-hidden="true"></i>Verified</p>
+                </div>
+                <div class="rating">
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                </div>
+                <h3>Sustained fat burning!</h3>
+                <p class="text-review">I’ve tried so many keto supplements, but Keto Power X is the only one that has given me real, lasting results. I’m finally burning fat without the dreaded keto flu. I’m on my third bottle and couldn’t be happier with how my body is transforming. It’s a must-have for anyone serious about their health.</p>
+            </div>
+
+            <div class="review">
+                <div class="user-container">
+                    <div class="user-img">
+                        <img src="img/review3.jpg" alt="">
+                        <div class="user-data">
+                            <h4>Lars</h4>
+                            <div class="user-country">
+                                <img src="img/austria.png" alt="" class="flag">
+                                <p>Austria</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="verified"><i class="fa fa-check" aria-hidden="true"></i>Verified</p>
+                </div>
+                <div class="rating">
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                </div>
+                <h3>Easy to use, fast results!</h3>
+                <p class="text-review">Keto Power X made my weight loss journey so much easier. I’ve lost 12 pounds in just 6 weeks, and I feel amazing. No crazy side effects, just steady fat loss and a huge energy boost. I’ll definitely keep using this product to stay on track.</p>
+            </div>
+
+            <div class="review">
+                <div class="user-container">
+                    <div class="user-img">
+                        <img src="img/review4.jpg" alt="">
+                        <div class="user-data">
+                            <h4>Claudia</h4>
+                            <div class="user-country">
+                                <img src="img/germany.png" alt="" class="flag">
+                                <p>Germany</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="verified"><i class="fa fa-check" aria-hidden="true"></i>Verified</p>
+                </div>
+                <div class="rating">
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                </div>
+                <h3>Perfect for a busy lifestyle!</h3>
+                <p class="text-review">As a busy mom, I don’t have time for complicated diets or long workout sessions, but Keto Power X fits right into my routine. I’ve dropped two dress sizes without having to make drastic changes to my lifestyle. Plus, it keeps me energized throughout the day!</p>
+            </div>
+
+            <div class="review">
+                <div class="user-container">
+                    <div class="user-img">
+                        <img src="img/review5.jpg" alt="">
+                        <div class="user-data">
+                            <h4>Edward</h4>
+                            <div class="user-country">
+                                <img src="img/france.png" alt="" class="flag">
+                                <p>France</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="verified"><i class="fa fa-check" aria-hidden="true"></i>Verified</p>
+                </div>
+                <div class="rating">
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                </div>
+                <h3>A natural approach to weight loss!</h3>
+                <p class="text-review">What I love most about Keto Power X is how natural it feels. I’m losing weight steadily, but it doesn’t feel like I’m pushing my body too hard. It works with my keto diet seamlessly, and I’ve noticed huge improvements in my focus and energy levels. So glad I found this!</p>
+            </div>
+
+            <div class="review">
+                <div class="user-container">
+                    <div class="user-img">
+                        <img src="img/review6.jpg" alt="">
+                        <div class="user-data">
+                            <h4>Patricia</h4>
+                            <div class="user-country">
+                                <img src="img/austria.png" alt="" class="flag">
+                                <p>Austria</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="verified"><i class="fa fa-check" aria-hidden="true"></i>Verified</p>
+                </div>
+                <div class="rating">
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                </div>
+                <h3>Energy Boost and Weight Loss!</h3>
+                <p class="text-review">I've been using Keto Power X for just over a month, and the results are fantastic! Not only have I lost 10 pounds, but my energy levels are through the roof. I love how easy it is to incorporate into my daily routine, and the fact that I don’t feel jittery or anxious.</p>
+            </div>
+
+        </div>
+    </div>
+    <button class="poppins-bold start-button last-button scroll-button"><span>Order Now</span></button>
+</div>
+
+</div>
+
+<script src="js/index.js"></script>
+</body>
+</html>
